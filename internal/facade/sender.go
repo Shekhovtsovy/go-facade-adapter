@@ -2,13 +2,13 @@ package facade
 
 import "fmt"
 
-// Sender is an interface which provides methods sending messages to clients
-type Sender interface {
-	Send(clientId int, message string) bool
+type driver interface {
+	Send(cid int, msg string) error
 }
 
-type driver interface {
-	Send(cid int, msg string) bool
+// Sender is an interface which provides methods sending messages to clients
+type Sender interface {
+	Send(cid int, msg string) error
 }
 
 type sender struct {
@@ -16,15 +16,17 @@ type sender struct {
 }
 
 // Send message to client
-func (s *sender) Send(cid int, msg string) bool {
+func (s *sender) Send(cid int, msg string) error {
 	fmt.Printf("Sending to client with id=%d: `%s`\n", cid, msg)
-	s.driver.Send(cid, msg)
-	return true
+	if err := s.driver.Send(cid, msg); err != nil {
+		return err
+	}
+	return nil
 }
 
 // NewSender returns a new Sender
-func NewSender(d driver) Sender {
+func NewSender(driver driver) Sender {
 	return &sender{
-		driver: d,
+		driver: driver,
 	}
 }
